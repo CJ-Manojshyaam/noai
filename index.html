@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NOAI</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-light: #fdfdfd;
+            --color-dark: #111111;
+            --color-text: #333333;
+            --color-accent: #007AFF;
+            --color-accent-light: rgba(0, 122, 255, 0.1);
+            --color-grey-dark: #888888;
+            --color-grey-light: #555555;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-light);
+            color: var(--color-dark);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+        }
+
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: var(--color-dark);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+
+        #splash-screen.hidden {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+            display: none;
+        }
+
+        .splash-logo svg {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0;
+            transform: scale(0.8);
+            animation: logoScaleFade 1.5s ease-out 0.5s forwards;
+        }
+        
+        #splash-text {
+            font-size: 10vw;
+            font-weight: 700;
+            opacity: 0;
+            animation: fadeIn 1s ease-out 1s forwards;
+        }
+
+        #splash-text .no { color: var(--color-grey-light); }
+        #splash-text .ai { color: var(--color-grey-dark); }
+        
+        main {
+            opacity: 0;
+            transition: opacity 0.5s ease-in;
+        }
+        
+        main.visible {
+            opacity: 1;
+        }
+        
+        .slide {
+            min-height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        .animate-on-scroll {
+            opacity: 0;
+            transition: opacity 1.2s cubic-bezier(0.165, 0.84, 0.44, 1), transform 1.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+        }
+
+        .fade-in-up { transform: translateY(50px); }
+        .fade-in-zoom { transform: scale(0.9); }
+        .fade-in-left { transform: translateX(-50px); }
+        
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: none;
+        }
+
+        h1 {
+            font-size: 64px;
+            font-weight: 700;
+            max-width: 900px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 56px;
+            font-weight: 600;
+            max-width: 800px;
+            line-height: 1.3;
+        }
+        
+        #home {
+            position: relative;
+        }
+        
+        .scroll-down {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+        
+        #testimonial {
+            background-color: #f7f7f7;
+        }
+        
+        #testimonial blockquote {
+            font-size: 40px;
+            font-weight: 600;
+            line-height: 1.5;
+            max-width: 900px;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        #testimonial cite {
+            font-size: 18px;
+            font-style: normal;
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        #problem {
+            background-color: var(--color-dark);
+            color: var(--color-light);
+        }
+        
+        #problem p {
+            color: #ccc;
+            margin-top: 20px;
+        }
+        
+        .illustration {
+            margin-top: 60px;
+            max-width: 80%;
+        }
+
+        .illustration svg {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+        }
+
+        .illustration path, .illustration line, .illustration circle {
+            stroke: var(--color-accent);
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: drawPath 2s ease-out forwards;
+        }
+
+        .statement {
+            font-size: 32px;
+            font-weight: 600;
+        }
+        
+        #reveal p {
+            margin-top: 40px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        
+        #benefit {
+            background-color: #f7f7f7;
+        }
+        
+        .benefit-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 80px;
+        }
+        
+        .benefit-item {
+            padding: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .benefit-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px var(--color-accent-light);
+        }
+
+        .benefit-item h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--color-grey-dark);
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .benefit-item p {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--color-dark);
+        }
+        
+        #contact h2 {
+            font-size: 48px;
+        }
+
+        .contact-link {
+            margin-top: 30px;
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--color-accent);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .contact-link:hover {
+            opacity: 0.7;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes logoScaleFade {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translate(-50%, 0);
+            }
+            40% {
+                transform: translate(-50%, -20px);
+            }
+            60% {
+                transform: translate(-50%, -10px);
+            }
+        }
+
+        @keyframes drawPath {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 48px; }
+            h2 { font-size: 40px; }
+            #testimonial blockquote { font-size: 28px; }
+            p { font-size: 18px; }
+            .statement { font-size: 24px; }
+            #reveal p { font-size: 22px; }
+            
+            .benefit-grid {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+            .benefit-item p { font-size: 24px; }
+            #contact h2 { font-size: 32px; }
+            .contact-link { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div class="splash-logo">
+            <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="40" stroke="#fdfdfd" stroke-width="3"/>
+                <path d="M30 50 L50 30 L70 50 L50 70 Z" fill="none" stroke="#fdfdfd" stroke-width="3"/>
+                <line x1="50" y1="30" x2="50" y2="70" stroke="#fdfdfd" stroke-width="3"/>
+                <circle cx="30" cy="50" r="5" fill="#fdfdfd"/>
+                <circle cx="70" cy="50" r="5" fill="#fdfdfd"/>
+            </svg>
+        </div>
+        <div id="splash-text">
+            <span class="no">NO</span><span class="ai">AI</span>
+        </div>
+    </div>
+
+    <main>
+        <section class="slide animate-on-scroll fade-in-up" id="home">
+            <h1>We create intelligence that’s simple, transparent, and human.</h1>
+            <div class="scroll-down">
+                <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3" />
+                </svg>
+            </div>
+        </section>
+
+        <section class="slide animate-on-scroll fade-in-up" id="testimonial">
+            <blockquote>“For the first time, we could see not just the suggestion, but the 'why' behind it. That was the game-changer.”</blockquote>
+            <cite>— Happy Customer</cite>
+        </section>
+
+        <section class="slide animate-on-scroll fade-in-zoom" id="problem">
+            <h2>Today's AI is a black box.</h2>
+            <div class="illustration">
+                <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 50 L50 30 L150 30 L190 50 L150 70 L50 70 Z" fill="#222"/>
+                    <path d="M50 70 L50 120 L150 120 L150 70 Z" fill="#111"/>
+                    <path d="M150 120 L190 100 L190 50 L150 70 Z" fill="#333"/>
+                    <text x="92" y="95" font-family="Inter" font-size="40" fill="#fff">?</text>
+                    <line x1="0" y1="85" x2="30" y2="85" stroke="#fff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <line x1="170" y1="85" x2="200" y2="85" stroke="#fff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                    <defs><marker id="arrowhead" markerWidth="5" markerHeight="4" refX="0" refY="2" orient="auto"><polygon points="0 0, 5 2, 0 4" fill="#fff" /></marker></defs>
+                </svg>
+            </div>
+            <p>You get an answer. You don't get the reason.</p>
+        </section>
+
+        <section class="slide animate-on-scroll fade-in-left" id="statement">
+            <h2 class="statement">We believed there was a better way.</h2>
+            <div class="illustration">
+                <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="100" cy="75" r="50" fill="none" stroke="var(--color-accent)" stroke-width="2"/>
+                    <path d="M80 75 L120 75" stroke="var(--color-accent)" stroke-width="2"/>
+                    <circle cx="80" cy="75" r="10" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="2"/>
+                    <circle cx="120" cy="75" r="10" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="2"/>
+                    <path d="M60 95 C80 115, 120 115, 140 95" stroke="var(--color-accent)" stroke-width="2" fill="none"/>
+                </svg>
+            </div>
+        </section>
+        
+        <section class="slide animate-on-scroll fade-in-zoom" id="reveal">
+            <h2>Introducing the Glass Box.</h2>
+            <div class="illustration">
+                <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 50 L50 30 L150 30 L190 50 L150 70 L50 70 Z" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="1.5"/>
+                    <path d="M50 70 L50 120 L150 120 L150 70 Z" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="1.5"/>
+                    <path d="M150 120 L190 100 L190 50 L150 70 Z" fill="var(--color-accent-light)" stroke="var(--color-accent)" stroke-width="1.5"/>
+                    <path d="M60 95 C 80 105, 120 75, 140 85" stroke="var(--color-accent)" stroke-width="2" fill="none" stroke-linecap="round"/>
+                    <line x1="0" y1="95" x2="40" y2="95" stroke="#333" stroke-width="2" marker-end="url(#arrowhead-dark)"/>
+                    <line x1="160" y1="85" x2="200" y2="85" stroke="#333" stroke-width="2" marker-end="url(#arrowhead-dark)"/>
+                    <defs><marker id="arrowhead-dark" markerWidth="5" markerHeight="4" refX="0" refY="2" orient="auto"><polygon points="0 0, 5 2, 0 4" fill="#333" /></marker></defs>
+                </svg>
+            </div>
+            <p>NOAI isn't just an answer. It's the reason.</p>
+        </section>
+
+        <section class="slide animate-on-scroll fade-in-up" id="benefit">
+            <h2>From doubt to decision.</h2>
+            <div class="benefit-grid stagger-children">
+                <div class="benefit-item">
+                    <h3>For the Doctor</h3>
+                    <p>Clarity in Diagnosis</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>For the Analyst</h3>
+                    <p>Confidence in Strategy</p>
+                </div>
+                <div class="benefit-item">
+                    <h3>For the Researcher</h3>
+                    <p>Trust in Data</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="slide animate-on-scroll fade-in-left" id="contact">
+            <h2>Ready to think clear?</h2>
+            <div class="illustration">
+                <svg viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 50 Q100 20 150 50" stroke="var(--color-accent)" stroke-width="2" fill="none"/>
+                    <circle cx="50" cy="50" r="8" fill="var(--color-accent)"/>
+                    <circle cx="150" cy="50" r="8" fill="var(--color-accent)"/>
+                    <path d="M80 80 L120 80" stroke="var(--color-accent)" stroke-width="2"/>
+                    <path d="M80 100 L120 100" stroke="var(--color-accent)" stroke-width="2"/>
+                </svg>
+            </div>
+            <a href="mailto:hello@noai.com" class="contact-link">hello@noai.com</a>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const splash = document.getElementById('splash-screen');
+            const mainContent = document.querySelector('main');
+
+            splash.addEventListener('transitionend', () => {
+                splash.style.display = 'none';
+                mainContent.classList.add('visible');
+            });
+
+            setTimeout(() => {
+                splash.classList.add('hidden');
+                setTimeout(() => {
+                    if (!mainContent.classList.contains('visible')) {
+                        splash.style.display = 'none';
+                        mainContent.classList.add('visible');
+                    }
+                }, 1500);
+            }, 2800);
+
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+
+                        if (entry.target.classList.contains('stagger-children')) {
+                            const children = entry.target.querySelectorAll('.benefit-item');
+                            children.forEach((child, index) => {
+                                child.style.transitionDelay = `${index * 200}ms`;
+                                child.classList.add('animate-on-scroll', 'fade-in-up', 'visible');
+                            });
+                        }
+
+                        const paths = entry.target.querySelectorAll('.illustration path, .illustration line, .illustration circle');
+                        paths.forEach((path, index) => {
+                            path.style.animationDelay = `${index * 200}ms`;
+                        });
+
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.2
+            });
+
+            animatedElements.forEach(el => {
+                if (el.classList.contains('stagger-children')) {
+                    const children = el.querySelectorAll('.benefit-item');
+                    children.forEach(child => {
+                        child.classList.add('animate-on-scroll', 'fade-in-up');
+                    });
+                }
+                observer.observe(el);
+            });
+        });
+    </script>
+
+</body>
+</html>
